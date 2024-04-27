@@ -20,14 +20,15 @@ async def register(db: db_dependency, user_request: UserCreate):
     Register a new user
     """
     email, password_1, password_2 = user_request.email, user_request.password_1, user_request.password_2
+    email_clean = email.strip().lower()
     # validate passwords
     if not validate_passwords(password_1, password_2):
-        return HTTPException(status_code=400, detail='Passwords do not match')
+        raise HTTPException(status_code=400, detail='Passwords do not match')
     # check if user exists
-    user = find_user_by_email(db, email)
+    user = find_user_by_email(db, email_clean)
     if user:
-        return HTTPException(status_code=400, detail='User already exists')
-    create_new_user(db, email, password_1)
+        raise HTTPException(status_code=400, detail='User already exists')
+    create_new_user(db, email_clean, password_1)
     return {'message': 'User registered'}
 
 
