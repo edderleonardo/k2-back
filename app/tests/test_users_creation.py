@@ -17,7 +17,7 @@ def test_register_validate_password():
 
 
 @patch('app.users.endpoints.find_user_by_email')
-def test_user_exists(find_user_by_email):
+def test_user_exists( find_user_by_email):
     find_user_by_email.return_value = {'email': 'userexists@gmail.com', 'password': 'hashed_password'}
 
     response = client.post(

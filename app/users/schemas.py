@@ -23,3 +23,11 @@ class Token(BaseModel):
 
     class Config:
         json_schema_extra = {'example': {'access_token': 'eyJ', 'token_type': 'bearer'}}
+
+
+class Login(BaseModel):
+    email: str
+    password: str
+
+    class Config:
+        json_schema_extra = {'example': {'email': 'user@email.com', 'password': 'secret'}}

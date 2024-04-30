@@ -1,12 +1,15 @@
+from datetime import timedelta
+
 from fastapi import APIRouter
 from fastapi import HTTPException
 from starlette import status
 
 from app.users.views import create_new_user
+from app.users.views import authenticate_user
 from app.users.views import find_user_by_email
 from app.users.views import validate_passwords
-
-# from app.users.models import User
+from app.users.views import generate_access_token
+from app.users.schemas import Login
 from app.users.schemas import UserCreate
 from app.helpers.db_dependency import db_dependency
 
@@ -33,5 +36,10 @@ async def register(db: db_dependency, user_request: UserCreate):
 
 
 @router.post('/login')
-def login():
-    return {'message': 'User logged in'}
+def login(db: db_dependency, login_request: Login):
+    user = authenticate_user(db, login_request.email, login_request.password)
+    if not user:
+        # INFO: raise an exception if the user is not found, but do not provide any details about the user
+        raise HTTPException(status_code=400, detail='Invalid credentials')
+    token = generate_access_token(user.email, user.uuid, timedelta(minutes=30))
+    return {'access_token': token, 'token_type': 'bearer'}
