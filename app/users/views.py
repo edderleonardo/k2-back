@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timezone
 from datetime import timedelta
 
 from jose import JWTError
@@ -37,3 +38,25 @@ def create_new_user(db, email, password):
     create_user = User(email=email, hashed_password=bycrypt_context.hash(password))
     db.add(create_user)
     db.commit()
+
+
+def authenticate_user(db, email, password):
+    """
+    Authenticate a user by email and password
+    """
+    user = find_user_by_email(db, email)
+    if not user:
+        return False
+    if not bycrypt_context.verify(password, user.hashed_password):
+        return False
+    return user
+
+
+def generate_access_token(email, user_id, expires_delta):
+    """
+    Generate an access token
+    """
+    encode = {'sub': email, 'user_id': user_id}
+    expire = datetime.now(timezone.utc) + expires_delta
+    encode.update({'exp': expire})
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
